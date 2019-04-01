@@ -44,7 +44,7 @@ app.post('/', (req, res) => {
 
   logger.log('info', `event, ${event}, ${outputPath.split('/').reverse()[0]}`);
 
-  fs.outputFile(outputPath, JSON.stringify(req.body), 'utf8', () => {});
+  fs.outputFileSync(outputPath, JSON.stringify(req.body), 'utf8');
 
   switch (event) {
     case 'pull_request_opened':
