@@ -1,14 +1,11 @@
-const dotenv = require('dotenv');
 const winston = require('winston');
 const request = require('request');
 const express = require('express')
+const config = require('config');
 const bodyParser = require('body-parser')
 const fs = require('fs-extra');
 const path = require('path');
 const app = express();
-const port = 3000;
-
-dotenv.config();
 
 const logger = winston.createLogger({
   format: winston.format.combine(
@@ -22,7 +19,7 @@ const logger = winston.createLogger({
 });
 
 const sendCommand = (resource, action, eventBody) => request({
-  uri: `http://0.0.0.0:3030/c/${resource}/${action}`,
+  uri: `${config.get('antonUrl')}/c/${resource}/${action}`,
   method: 'POST',
   headers: {
     'Content-Type': 'application/json'
@@ -44,20 +41,23 @@ app.post('/', (req, res) => {
 
   logger.log('info', `event, ${event}, ${outputPath.split('/').reverse()[0]}`);
 
-  fs.outputFileSync(outputPath, JSON.stringify(req.body), 'utf8');
+  if (process.env.NODE_ENV === 'development') {
+    fs.outputFileSync(outputPath, JSON.stringify(req.body), 'utf8');
+  }
 
   switch (event) {
     case 'pull_request_opened':
-      if (req.body.pull_request.mergable instanceof String) {
-        req.body.pull_request.mergable = false;
-      }
       return sendCommand('pull-request', 'open', req.body);
     case 'pull_request_assigned':
       if (req.body)
       return sendCommand('pull-request', 'assign', req.body);
+    case 'pull_request_closed':
+      if (req.body)
+      return sendCommand('pull-request', 'close', req.body);
     default:
       break;
   }
 })
 
+const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Isla listening on port ${port}!`))
