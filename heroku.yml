@@ -2,4 +2,4 @@ build:
   docker:
     web: Dockerfile
 run:
-  web: ./node_modules/.bin/pm2-runtime start server/app.yml -1
+  web: ./node_modules/.bin/pm2-runtime start server/app.yml
