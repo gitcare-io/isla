@@ -57,6 +57,8 @@ app.post('/', (req, res) => {
     default:
       break;
   }
+
+  res.status(200).send('ok');
 })
 
 const port = process.env.PORT || 3000;
